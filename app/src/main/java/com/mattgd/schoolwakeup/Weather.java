@@ -5,7 +5,7 @@ package com.mattgd.schoolwakeup;
  */
 public class Weather {
 
-
+    public static double latitude, longitude;
 
     public void getUserLocation() {
 
