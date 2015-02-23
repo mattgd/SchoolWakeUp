@@ -7,3 +7,4 @@ Ideas for the future:
 
 Resources:
 - https://developer.android.com/training/location/retrieve-current.html
+- http://openweathermap.org/
