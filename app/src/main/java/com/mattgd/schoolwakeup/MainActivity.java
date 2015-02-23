@@ -5,6 +5,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -17,10 +19,16 @@ public class MainActivity extends ActionBarActivity
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
 
+    // Components
+    TextView testTest;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        testTest = (TextView) findViewById(R.id.textView2);
+
         buildGoogleApiClient();
     }
 
@@ -52,6 +60,7 @@ public class MainActivity extends ActionBarActivity
                 .addOnConnectionFailedListener(this)
                 .addApi(LocationServices.API)
                 .build();
+        mGoogleApiClient.connect();
     }
 
     // Google API Client
@@ -59,14 +68,12 @@ public class MainActivity extends ActionBarActivity
     public void onConnected(Bundle connectionHint) {
         // Connected to Google Play services!
         // The good stuff goes here.
-       mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
             Weather.latitude = mLastLocation.getLatitude();
             Weather.longitude = mLastLocation.getLongitude();
             // Text box texts
-            // mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-            //mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
+            testTest.setText(String.valueOf(Weather.latitude) + ", " + String.valueOf(Weather.longitude));
         }
     }
 
