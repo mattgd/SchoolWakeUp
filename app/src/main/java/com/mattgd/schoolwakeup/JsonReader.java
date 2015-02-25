@@ -1,5 +1,6 @@
 package com.mattgd.schoolwakeup;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -40,10 +41,9 @@ public class JsonReader {
         }
     }
 
-    public static void main(String[] args) throws IOException, JSONException {
-        JSONObject json = readJsonFromUrl("api.openweathermap.org/data/2.5/weather?lat=" + Weather.latitude + "&lon=" + Weather.longitude);
-        System.out.println(json.toString());
-        System.out.println(json.get("weather"));
+    // Returns a JSON response
+    public JSONObject getJSONObject(String url) throws IOException, JSONException {
+        return readJsonFromUrl(url);
     }
 
 }
