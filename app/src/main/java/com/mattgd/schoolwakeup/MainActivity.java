@@ -1,10 +1,15 @@
 package com.mattgd.schoolwakeup;
 
+import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -20,14 +25,22 @@ public class MainActivity extends ActionBarActivity
     private Location mLastLocation;
 
     // Components
-    TextView testTest;
+    RelativeLayout mainLayout;
+    //TextView testTest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
 
-        testTest = (TextView) findViewById(R.id.textView2);
+        Weather weather = new Weather();
+        try {
+            mainLayout.setBackgroundResource(weather.getWeather());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        //testTest = (TextView) findViewById(R.id.textView2);
 
         buildGoogleApiClient();
     }
@@ -73,7 +86,7 @@ public class MainActivity extends ActionBarActivity
             Weather.latitude = mLastLocation.getLatitude();
             Weather.longitude = mLastLocation.getLongitude();
             // Text box texts
-            testTest.setText(String.valueOf(Weather.latitude) + ", " + String.valueOf(Weather.longitude));
+            //testTest.setText(String.valueOf(Weather.latitude) + ", " + String.valueOf(Weather.longitude));
         }
     }
 
