@@ -1,5 +1,10 @@
 package com.mattgd.schoolwakeup;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
@@ -8,6 +13,8 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -23,10 +30,13 @@ public class MainActivity extends ActionBarActivity
 
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
+    private PendingIntent pendingIntent;
+    private boolean alarmEnabled = false;
 
     // Components
-    RelativeLayout mainLayout;
-    //TextView testTest;
+    static RelativeLayout mainLayout;
+    static TextView alarmStatusTextView;
+    static Button toggleAlarmButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,13 +44,36 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
         mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
 
+        Resources res = getResources(); //resource handle
         Weather weather = new Weather();
+        Drawable drawable = null;
         try {
-            mainLayout.setBackgroundResource(weather.getWeather());
+            drawable = res.getDrawable(weather.getWeather()); // Weather image
         } catch (Exception e) {
             e.printStackTrace();
         }
-        //testTest = (TextView) findViewById(R.id.textView2);
+
+        if (drawable != null) {
+            mainLayout.setBackground(drawable); // Set the background to the weather image
+        }
+
+        alarmStatusTextView = (TextView) findViewById(R.id.alarmStatusTextView); // Set alarmStatusTextView
+        toggleAlarmButton = (Button) findViewById(R.id.toggleAlarmButton); // Connect to "setAlarmButton"
+
+        /* Retrieve a PendingIntent that will perform a broadcast */
+        Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
+        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, 0);
+
+        toggleAlarmButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (alarmEnabled) {
+                    setAlarm();
+                } else {
+                    cancelAlarm();
+                }
+            }
+        });
 
         buildGoogleApiClient();
     }
@@ -79,14 +112,11 @@ public class MainActivity extends ActionBarActivity
     // Google API Client
     @Override
     public void onConnected(Bundle connectionHint) {
-        // Connected to Google Play services!
-        // The good stuff goes here.
+        // Connected to Google Play services
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
         if (mLastLocation != null) {
             Weather.latitude = mLastLocation.getLatitude();
             Weather.longitude = mLastLocation.getLongitude();
-            // Text box texts
-            //testTest.setText(String.valueOf(Weather.latitude) + ", " + String.valueOf(Weather.longitude));
         }
     }
 
@@ -103,6 +133,19 @@ public class MainActivity extends ActionBarActivity
         // may occur while attempting to connect with Google.
         //
         // More about this in the next section.
+    }
+
+    public void setAlarm() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        int interval = 8000;
+
+        manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
+        //Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
+    }
+
+    public void cancelAlarm() {
+        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        manager.cancel(pendingIntent);
     }
 
 }

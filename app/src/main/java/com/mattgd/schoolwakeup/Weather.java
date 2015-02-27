@@ -1,7 +1,5 @@
 package com.mattgd.schoolwakeup;
 
-import android.widget.ImageView;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
