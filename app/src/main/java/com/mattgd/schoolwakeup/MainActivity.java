@@ -5,38 +5,37 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.LatLng;
+
+import java.util.Calendar;
 
 public class MainActivity extends ActionBarActivity
         implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private GoogleApiClient mGoogleApiClient;
     private Location mLastLocation;
-    private PendingIntent pendingIntent;
-    private boolean alarmEnabled = false;
 
     // Components
-    static RelativeLayout mainLayout;
-    static TextView alarmStatusTextView;
-    static Button toggleAlarmButton;
+    RelativeLayout mainLayout;
+    TextView alarmStatusTextView;
+    private Button toggleAlarmButton;
+    private Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,38 +43,38 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
         mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
 
-        Resources res = getResources(); //resource handle
-        Weather weather = new Weather();
-        Drawable drawable = null;
-        try {
-            drawable = res.getDrawable(weather.getWeather()); // Weather image
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        if (drawable != null) {
-            mainLayout.setBackground(drawable); // Set the background to the weather image
-        }
+        new Thread(new Runnable() {
+            public void run() {
+                buildGoogleApiClient();
+            }
+        }).start();
 
         alarmStatusTextView = (TextView) findViewById(R.id.alarmStatusTextView); // Set alarmStatusTextView
+
         toggleAlarmButton = (Button) findViewById(R.id.toggleAlarmButton); // Connect to "setAlarmButton"
-
-        /* Retrieve a PendingIntent that will perform a broadcast */
-        Intent alarmIntent = new Intent(MainActivity.this, AlarmReceiver.class);
-        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, 0);
-
         toggleAlarmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
             public void onClick(View v) {
-                if (alarmEnabled) {
-                    setAlarm();
-                } else {
-                    cancelAlarm();
+                try {
+                    Intent intent = new Intent(MainActivity.this, AlarmReceiverActivity.class);
+                    PendingIntent pendingIntent = PendingIntent.getActivity(MainActivity.this, 2, intent, PendingIntent.FLAG_CANCEL_CURRENT);
+                    AlarmManager am = (AlarmManager) getSystemService(ALARM_SERVICE);
+                    am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 5000, pendingIntent);
+
+                    if (toast != null) {
+                        toast.cancel();
+                    }
+
+                    toast = Toast.makeText(getApplicationContext(), "Alarm for activity is set for 5 seconds from now.", Toast.LENGTH_LONG);
+                    toast.show();
+                } catch (NumberFormatException e) {
+                    if (toast != null) {
+                        toast.cancel();
+                    }
+                    toast = Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_LONG);
+                    Log.i("Main", "Number format exception!");
                 }
             }
         });
-
-        buildGoogleApiClient();
     }
 
     @Override
@@ -114,9 +113,26 @@ public class MainActivity extends ActionBarActivity
     public void onConnected(Bundle connectionHint) {
         // Connected to Google Play services
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+
         if (mLastLocation != null) {
             Weather.latitude = mLastLocation.getLatitude();
             Weather.longitude = mLastLocation.getLongitude();
+        }
+
+        Resources res = getResources(); //resource handle
+        Weather weather = new Weather();
+        Drawable drawable = null;
+        try {
+            weather.getWeather();
+            if (Weather.background != -1) {
+                drawable = res.getDrawable(Weather.background); // Weather image
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (drawable != null) {
+            mainLayout.setBackground(drawable); // Set the background to the weather image
         }
     }
 
@@ -133,19 +149,6 @@ public class MainActivity extends ActionBarActivity
         // may occur while attempting to connect with Google.
         //
         // More about this in the next section.
-    }
-
-    public void setAlarm() {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        int interval = 8000;
-
-        manager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
-        //Toast.makeText(this, "Alarm Set", Toast.LENGTH_SHORT).show();
-    }
-
-    public void cancelAlarm() {
-        AlarmManager manager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
-        manager.cancel(pendingIntent);
     }
 
 }
