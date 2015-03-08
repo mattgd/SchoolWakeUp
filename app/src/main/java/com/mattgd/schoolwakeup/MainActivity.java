@@ -123,10 +123,7 @@ public class MainActivity extends ActionBarActivity
         Weather weather = new Weather();
         Drawable drawable = null;
         try {
-            weather.getWeather();
-            if (Weather.background != -1) {
-                drawable = res.getDrawable(Weather.background); // Weather image
-            }
+            drawable = res.getDrawable(weather.execute().get()); // Weather image
         } catch (Exception e) {
             e.printStackTrace();
         }
