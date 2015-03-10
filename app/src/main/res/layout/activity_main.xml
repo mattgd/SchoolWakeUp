@@ -6,7 +6,7 @@
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
     android:id="@+id/mainLayout">
 
-    <TextView android:text="@string/hello_world" android:layout_width="wrap_content"
+    <TextView android:text="The alarm is disabled." android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/alarmStatusTextView" />
 
@@ -37,6 +37,8 @@
         android:layout_height="wrap_content"
         android:text="Toggle Alarm"
         android:id="@+id/toggleAlarmButton"
-        android:layout_below="@+id/settingsButton" />
+        android:layout_below="@+id/settingsButton"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
 
 </RelativeLayout>

@@ -15,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +36,9 @@ public class MainActivity extends ActionBarActivity
     RelativeLayout mainLayout;
     TextView alarmStatusTextView;
     private Button toggleAlarmButton;
+    private ImageButton settingsButton;
     private Toast toast;
+    boolean enabledWeatherBackground = false; // For debugging purposes, this is disabled.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,11 +46,13 @@ public class MainActivity extends ActionBarActivity
         setContentView(R.layout.activity_main);
         mainLayout = (RelativeLayout) findViewById(R.id.mainLayout);
 
-        new Thread(new Runnable() {
-            public void run() {
-                buildGoogleApiClient();
-            }
-        }).start();
+        if (enabledWeatherBackground) {
+            new Thread(new Runnable() {
+                public void run() {
+                    buildGoogleApiClient();
+                }
+            }).start();
+        }
 
         alarmStatusTextView = (TextView) findViewById(R.id.alarmStatusTextView); // Set alarmStatusTextView
 
@@ -75,23 +80,36 @@ public class MainActivity extends ActionBarActivity
                 }
             }
         });
+
+        settingsButton = (ImageButton) findViewById(R.id.settingsButton); // Connect to "settingsButton"
+        settingsButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                try {
+                    Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                    startActivity(intent);
+                } catch (NumberFormatException e) {
+                    if (toast != null) {
+                        toast.cancel();
+                    }
+                    toast = Toast.makeText(MainActivity.this, "Error!", Toast.LENGTH_LONG);
+                    Log.i("Main", "Number format exception!");
+                }
+            }
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
+        // Adds items to the action bar
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Handle action bar component clicks here.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
@@ -135,17 +153,12 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public void onConnectionSuspended(int cause) {
-        // The connection has been interrupted.
-        // Disable any UI components that depend on Google APIs
-        // until onConnected() is called.
+        // Called when connection has been interrupted.
     }
 
     @Override
     public void onConnectionFailed(ConnectionResult result) {
-        // This callback is important for handling errors that
-        // may occur while attempting to connect with Google.
-        //
-        // More about this in the next section.
+        // Handles errors while attempting to connect with Google.
     }
 
 }

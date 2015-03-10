@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="school_name"></string>
+    <string name="school_website"></string>
+    <string name="school_start_time"></string>
+    <string name="school_message"></string>
+    <string name="school_update_time"></string>
+</resources>
